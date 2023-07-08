@@ -1,0 +1,17 @@
+// Basic grammar for simple boolean logic expressions.
+
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+
+logexpr = { SOI ~ expr ~ EOI }
+
+expr = { prefix* ~ primary ~ (infix ~ prefix* ~ primary)* }
+
+infix = _{ and | or }
+and   =  { "*" }
+or    =  { "+" }
+
+prefix = _{ not }
+not    =  { "!" }
+
+primary = _{ var | "(" ~ expr ~ ")" }
+var     =  { (ASCII_ALPHANUMERIC | "_")+ }
