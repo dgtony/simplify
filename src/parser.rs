@@ -62,13 +62,64 @@ pub enum Expression {
     And(Box<Expression>, Box<Expression>),
 }
 
-// Part 1: lexing
-pub fn tokenize(_input: &str) -> Result<Vec<Token>, &str> {
-    todo!("tokenize input expression");
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_expressions() {
+        let expr = "a | b & !c";
+        let res = parse(expr).unwrap();
+        assert_eq!(res, Expression::Or(
+            Box::new(Expression::Var("a".to_string())),
+            Box::new(Expression::And(
+                Box::new(Expression::Var("b".to_string())),
+                Box::new(Expression::Not(
+                    Box::new(Expression::Var("c".to_string()))
+                )),
+            )),
+        ))
+    }
+
+    #[test]
+    fn single_variable() {
+        let expr = "a345_bc";
+        let res = parse(expr).unwrap();
+        assert_eq!(res, Expression::Var("a345_bc".to_string()));
+    }
+
+    #[test]
+    fn sloppy_formatting() {
+        let expr = "\n\t  a  \t| \tb &\n!  c  \n ";
+        let res = parse(expr).unwrap();
+        assert_eq!(res, Expression::Or(
+            Box::new(Expression::Var("a".to_string())),
+            Box::new(Expression::And(
+                Box::new(Expression::Var("b".to_string())),
+                Box::new(Expression::Not(
+                    Box::new(Expression::Var("c".to_string()))
+                )),
+            )),
+        ))
+    }
+
+    #[test]
+    fn parenthesis() {
+        let expr = "(![12vv + ([(ds_1)])] & ([a | !b]))";
+        let res = parse(expr).unwrap();
+        assert_eq!(res, Expression::And(
+                Box::new(Expression::Not(
+                    Box::new(Expression::Or(
+                        Box::new(Expression::Var("12vv".to_string())),
+                        Box::new(Expression::Var("ds_1".to_string()))
+                    ))
+                )),
+            Box::new(Expression::Or(
+                Box::new(Expression::Var("a".to_string())),
+                Box::new(Expression::Not(
+                    Box::new(Expression::Var("b".to_string()))
+                ))
+            ))
+        ))
+    }
 }
-
-// Part 2: parsing
-// TODO
-
-// Part 3: constructing AST
-// TODO
