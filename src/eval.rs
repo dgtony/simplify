@@ -1,7 +1,6 @@
 use crate::parser;
-use std::collections::HashSet;
-
 use parser::Expression;
+use std::collections::{HashMap, HashSet};
 
 // Find all unique variables in expression.
 pub fn find_variables(expr: &Expression) -> HashSet<&str> {
@@ -15,16 +14,27 @@ fn traverse_expression_tree<'a>(expr: &'a Expression, vars: &mut HashSet<&'a str
         Expression::Var(v) => {
             vars.insert(v);
         }
-        Expression::Not(e) => traverse_expression_tree(e.as_ref(), vars),
+        Expression::Not(e) => traverse_expression_tree(e, vars),
         Expression::Or(lhs, rhs) => {
-            traverse_expression_tree(lhs.as_ref(), vars);
-            traverse_expression_tree(rhs.as_ref(), vars);
+            traverse_expression_tree(lhs, vars);
+            traverse_expression_tree(rhs, vars);
         }
         Expression::And(lhs, rhs) => {
-            traverse_expression_tree(lhs.as_ref(), vars);
-            traverse_expression_tree(rhs.as_ref(), vars);
+            traverse_expression_tree(lhs, vars);
+            traverse_expression_tree(rhs, vars);
         }
     };
+}
+
+// Evaluate expression with given set of values for variables.
+// Variables missing in set are considered as a false ones.
+pub fn evaluate(expr: &Expression, vars: &HashMap<&str, bool>) -> bool {
+    match expr {
+        Expression::Var(v) => *vars.get(v.as_str()).or(Some(&false)).unwrap(),
+        Expression::Not(e) => !evaluate(e, vars),
+        Expression::Or(lhs, rhs) => evaluate(lhs, vars) | evaluate(rhs, vars),
+        Expression::And(lhs, rhs) => evaluate(lhs, vars) & evaluate(rhs, vars),
+    }
 }
 
 #[cfg(test)]
