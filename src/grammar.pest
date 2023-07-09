@@ -14,4 +14,4 @@ prefix = _{ not }
 not    =  { "!" }
 
 primary = _{ var | "(" ~ expr ~ ")" | "[" ~ expr ~ "]" }
-var     =  { (ASCII_ALPHANUMERIC | "_")+ }
+var     =  @{ (ASCII_ALPHANUMERIC | "_")+ }
