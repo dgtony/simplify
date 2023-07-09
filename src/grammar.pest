@@ -7,8 +7,8 @@ logexpr = _{ SOI ~ expr ~ EOI }
 expr = { prefix* ~ primary ~ (infix ~ prefix* ~ primary)* }
 
 infix = _{ and | or }
-and   =  { "*" }
-or    =  { "+" }
+and   =  { "&" | "*" }
+or    =  { "|" | "+" }
 
 prefix = _{ not }
 not    =  { "!" }
