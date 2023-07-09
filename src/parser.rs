@@ -12,7 +12,7 @@ struct LogicParser;
 
 pub fn try_it(test_str: &str) {
     // Raw parsing result, used as a source for Pratt parser.
-    let pairs = LogicParser::parse(Rule::logexpr, test_str).expect("WTF?");
+    let mut pairs = LogicParser::parse(Rule::logexpr, test_str).expect("WTF?");
 
     // use Pratt parser to get operator precedence correctly
     // (precedence depends on enumeration order)
@@ -21,7 +21,8 @@ pub fn try_it(test_str: &str) {
         .op(Op::infix(Rule::and, Assoc::Left))
         .op(Op::prefix(Rule::not));
 
-    let res = parse_expr(pairs, &pratt);
+    // inner of expr
+    let res = parse_expr(pairs.next().unwrap().into_inner(), &pratt);
     println!("Result: {:#?}", res);
 }
 
@@ -30,16 +31,15 @@ fn parse_expr<'a>(pairs: Pairs<'a, Rule>, pratt: &PrattParser<Rule>) -> String {
         .map_primary(|primary| match primary.as_rule() {
             Rule::var  => primary.as_str().to_owned(),
             Rule::expr => parse_expr(primary.into_inner(), pratt), // from "(" ~ expr ~ ")"
-            Rule::logexpr => primary.as_str().to_owned(), // terminal state
             _          => unreachable!(),
         })
         .map_prefix(|op, rhs| match op.as_rule() {
-            Rule::not  => format!("NOT {}", rhs),
+            Rule::not  => format!("[NOT {}]", rhs),
             _          => unreachable!(),
         })
         .map_infix(|lhs, op, rhs| match op.as_rule() {
-            Rule::and  => format!("{} AND {}", lhs, rhs),
-            Rule::or   => format!("{} OR {}", lhs, rhs),
+            Rule::and  => format!("[{} AND {}]", lhs, rhs),
+            Rule::or   => format!("[{} OR {}]", lhs, rhs),
             _          => unreachable!(),
         })
         .parse(pairs)

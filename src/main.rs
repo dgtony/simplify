@@ -5,9 +5,7 @@
 
 mod parser;
 
-use parser::{Token, try_it};
-
-const wtf: Token = Token::Not;
+use parser::{try_it};
 
 fn main() {
     let test_str: &str = "!c + a_1 *! ( c*!_d12) + !( !a_2 *!cdeFG_12_op)";
