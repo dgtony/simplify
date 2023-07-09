@@ -55,4 +55,45 @@ mod tests {
         let vars = find_variables(&expr);
         assert_eq!(vars, HashSet::from(["a", "b"]))
     }
+
+    #[test]
+    fn eval() {
+        struct TestCase<'a> {
+            vars: HashMap<&'a str, bool>,
+            expected: bool,
+        }
+
+        let expr = parse("(a | b) & !c | [!d & a | c & !b]").unwrap();
+
+        let test_cases: Vec<TestCase> = Vec::from([
+            TestCase {
+                vars: HashMap::from([("a", true), ("b", true), ("c", true), ("d", true)]),
+                expected: false,
+            },
+            TestCase {
+                vars: HashMap::from([("a", true), ("b", false), ("c", true), ("d", false)]),
+                expected: true,
+            },
+            TestCase {
+                vars: HashMap::from([("a", false), ("b", true), ("c", false), ("d", false)]),
+                expected: true,
+            },
+            TestCase {
+                vars: HashMap::new(),
+                expected: false,
+            },
+        ]);
+
+        for (i, tt) in test_cases.iter().enumerate() {
+            let result = evaluate(&expr, &tt.vars);
+            assert_eq!(
+                result,
+                tt.expected,
+                "case {} -> expected: {:?}, got: {:?}",
+                i + 1,
+                tt.expected,
+                result
+            )
+        }
+    }
 }
