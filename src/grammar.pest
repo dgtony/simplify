@@ -13,5 +13,5 @@ or    =  { "|" | "+" }
 prefix = _{ not }
 not    =  { "!" }
 
-primary = _{ var | "(" ~ expr ~ ")" }
+primary = _{ var | "(" ~ expr ~ ")" | "[" ~ expr ~ "]" }
 var     =  { (ASCII_ALPHANUMERIC | "_")+ }
