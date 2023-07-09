@@ -26,40 +26,40 @@ lazy_static::lazy_static! {
 struct LogicParser;
 
 // Parse string with logical expression into AST.
-pub fn parse(expression: &str) -> Result<AstNode, Error<Rule>> {
+pub fn parse(expr: &str) -> Result<Expression, Error<Rule>> {
     // Raw parsing result, used as a source for Pratt parser.
-    let mut pairs = LogicParser::parse(Rule::logexpr, expression)?;
+    let mut pairs = LogicParser::parse(Rule::logexpr, expr)?;
 
     // starting from the inner of expr
     Ok(parse_expr(pairs.next().unwrap().into_inner()))
 }
 
 // Transform plain grammar-level tree into proper AST.
-fn parse_expr(pairs: Pairs<Rule>) -> AstNode {
+fn parse_expr(pairs: Pairs<Rule>) -> Expression {
     PRATT_PARSER
         .map_primary(|primary| match primary.as_rule() {
-            Rule::var => AstNode::Var(primary.as_str().to_string()),
+            Rule::var => Expression::Var(primary.as_str().to_string()),
             Rule::expr => parse_expr(primary.into_inner()), // from "(" ~ expr ~ ")"
             _ => unreachable!(),
         })
         .map_prefix(|op, rhs| match op.as_rule() {
-            Rule::not => AstNode::Not(Box::new(rhs)),
+            Rule::not => Expression::Not(Box::new(rhs)),
             _ => unreachable!(),
         })
         .map_infix(|lhs, op, rhs| match op.as_rule() {
-            Rule::and => AstNode::And(Box::new(lhs), Box::new(rhs)),
-            Rule::or => AstNode::Or(Box::new(lhs), Box::new(rhs)),
+            Rule::and => Expression::And(Box::new(lhs), Box::new(rhs)),
+            Rule::or => Expression::Or(Box::new(lhs), Box::new(rhs)),
             _ => unreachable!(),
         })
         .parse(pairs)
 }
 
 #[derive(Debug, PartialEq)]
-pub enum AstNode {
+pub enum Expression {
     Var(String),
-    Not(Box<AstNode>),
-    Or(Box<AstNode>, Box<AstNode>),
-    And(Box<AstNode>, Box<AstNode>),
+    Not(Box<Expression>),
+    Or(Box<Expression>, Box<Expression>),
+    And(Box<Expression>, Box<Expression>),
 }
 
 // Part 1: lexing
