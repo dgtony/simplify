@@ -70,15 +70,16 @@ mod tests {
     fn basic_expressions() {
         let expr = "a | b & !c";
         let res = parse(expr).unwrap();
-        assert_eq!(res, Expression::Or(
-            Box::new(Expression::Var("a".to_string())),
-            Box::new(Expression::And(
-                Box::new(Expression::Var("b".to_string())),
-                Box::new(Expression::Not(
-                    Box::new(Expression::Var("c".to_string()))
+        assert_eq!(
+            res,
+            Expression::Or(
+                Box::new(Expression::Var("a".to_string())),
+                Box::new(Expression::And(
+                    Box::new(Expression::Var("b".to_string())),
+                    Box::new(Expression::Not(Box::new(Expression::Var("c".to_string())))),
                 )),
-            )),
-        ))
+            )
+        )
     }
 
     #[test]
@@ -92,34 +93,34 @@ mod tests {
     fn sloppy_formatting() {
         let expr = "\n\t  a  \t| \tb &\n!  c  \n ";
         let res = parse(expr).unwrap();
-        assert_eq!(res, Expression::Or(
-            Box::new(Expression::Var("a".to_string())),
-            Box::new(Expression::And(
-                Box::new(Expression::Var("b".to_string())),
-                Box::new(Expression::Not(
-                    Box::new(Expression::Var("c".to_string()))
+        assert_eq!(
+            res,
+            Expression::Or(
+                Box::new(Expression::Var("a".to_string())),
+                Box::new(Expression::And(
+                    Box::new(Expression::Var("b".to_string())),
+                    Box::new(Expression::Not(Box::new(Expression::Var("c".to_string())))),
                 )),
-            )),
-        ))
+            )
+        )
     }
 
     #[test]
     fn parenthesis() {
         let expr = "(![12vv + ([(ds_1)])] & ([a | !b]))";
         let res = parse(expr).unwrap();
-        assert_eq!(res, Expression::And(
-                Box::new(Expression::Not(
-                    Box::new(Expression::Or(
-                        Box::new(Expression::Var("12vv".to_string())),
-                        Box::new(Expression::Var("ds_1".to_string()))
-                    ))
-                )),
-            Box::new(Expression::Or(
-                Box::new(Expression::Var("a".to_string())),
-                Box::new(Expression::Not(
-                    Box::new(Expression::Var("b".to_string()))
+        assert_eq!(
+            res,
+            Expression::And(
+                Box::new(Expression::Not(Box::new(Expression::Or(
+                    Box::new(Expression::Var("12vv".to_string())),
+                    Box::new(Expression::Var("ds_1".to_string()))
+                )))),
+                Box::new(Expression::Or(
+                    Box::new(Expression::Var("a".to_string())),
+                    Box::new(Expression::Not(Box::new(Expression::Var("b".to_string()))))
                 ))
-            ))
-        ))
+            )
+        )
     }
 }
