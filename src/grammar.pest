@@ -2,7 +2,7 @@
 
 WHITESPACE = _{ " " | "\t" | NEWLINE }
 
-logexpr = { SOI ~ expr ~ EOI }
+logexpr = _{ SOI ~ expr ~ EOI }
 
 expr = { prefix* ~ primary ~ (infix ~ prefix* ~ primary)* }
 
