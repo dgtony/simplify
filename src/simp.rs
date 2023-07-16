@@ -12,7 +12,7 @@ use crate::parser::Expression;
 //   table encoding and expression simplification.
 pub fn truth_table_ones(expr: &Expression) -> Option<(Vec<String>, Vec<usize>)> {
     let vars_set = find_variables(expr);
-    if vars_set.len() > 63 {
+    if vars_set.len() > 32 {
         // give up fast, problem is too hard
         return None;
     }
