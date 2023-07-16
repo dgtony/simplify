@@ -1,6 +1,7 @@
 use std::collections::HashMap;
-use std::fmt::Error;
 use std::iter::{repeat, zip};
+
+use quine_mc_cluskey::Bool as QBool;
 
 use crate::eval::{evaluate, find_variables};
 use crate::parser::Expression;
@@ -52,6 +53,64 @@ fn fill_vars<'a>(
         let var: &str = &stable_order[bit];
         vars.insert(var, value);
         num_v = num_v / 2;
+    }
+}
+
+// Simplify given logical expression and return all found minimal
+// solutions converted into its string representation.
+//
+// Current version uses external crate quine-mc_cluskey for simplification.
+// Type conversions add some non-negligible overhead especially in case of
+// dense truth tables, which could be eliminated by using another more
+// efficient implementation, e.g. based on:
+//
+//   Udovenko, Aleksei. "DenseQMC: an efficient bit-slice implementation of
+//   the Quine-McCluskey algorithm." arXiv preprint arXiv:2302.10083 (2023).
+pub fn simplify(expr: &Expression) -> Option<Vec<String>> {
+    let (labels, ones) = truth_table_ones(expr)?;
+    let qmc_exp = encode(ones, labels.len() as u8);
+
+    Some(
+        qmc_exp
+            .simplify()
+            .iter()
+            .map(|solution| decode(solution, &labels))
+            .collect(),
+    )
+}
+
+// Turn vector of minterms into qmc expression.
+fn encode(ones: Vec<usize>, num_terms: u8) -> QBool {
+    let mut terms: Vec<QBool> = Vec::new();
+    for one in ones {
+        let mut mt = Vec::new();
+        for i in 0..num_terms {
+            if (one & 1 << i) > 0 {
+                mt.push(QBool::Term(i))
+            } else {
+                mt.push(QBool::Not(Box::new(QBool::Term(i))))
+            }
+        }
+        terms.push(QBool::And(mt));
+    }
+    QBool::Or(terms)
+}
+
+// Turn resulting qmc expression into string.
+fn decode(e: &QBool, labels: &[String]) -> String {
+    match e {
+        QBool::False => "false".to_string(),
+        QBool::True => "true".to_string(),
+        QBool::Term(i) => labels[*i as usize].clone(),
+        QBool::Not(inner) => format!("!{}", decode(inner.as_ref(), labels)),
+        QBool::And(inner) => {
+            let decoded: Vec<String> = inner.iter().map(|s| decode(s, labels)).collect();
+            decoded.join(" & ")
+        }
+        QBool::Or(inner) => {
+            let decoded: Vec<String> = inner.iter().map(|s| decode(s, labels)).collect();
+            decoded.join(" | ")
+        }
     }
 }
 
