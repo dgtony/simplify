@@ -1,12 +1,12 @@
 mod eval;
 mod parser;
-mod simp;
+mod logic;
 
 use std::env;
 use std::process::exit;
 
 use parser::parse;
-use simp::simplify;
+use logic::simplify;
 
 fn main() {
     let expr = match env::args().skip(1).next() {
