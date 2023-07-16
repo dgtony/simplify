@@ -32,8 +32,8 @@ pub fn evaluate(expr: &Expression, vars: &HashMap<&str, bool>) -> bool {
     match expr {
         Expression::Var(v) => *vars.get(v.as_str()).or(Some(&false)).unwrap(),
         Expression::Not(e) => !evaluate(e, vars),
-        Expression::Or(lhs, rhs) => evaluate(lhs, vars) | evaluate(rhs, vars),
-        Expression::And(lhs, rhs) => evaluate(lhs, vars) & evaluate(rhs, vars),
+        Expression::Or(lhs, rhs) => evaluate(lhs, vars) || evaluate(rhs, vars),
+        Expression::And(lhs, rhs) => evaluate(lhs, vars) && evaluate(rhs, vars),
     }
 }
 
