@@ -23,7 +23,7 @@ pub fn truth_table_ones(expr: &Expression) -> Option<(Vec<String>, Vec<usize>)> 
 
     // stable order of variables
     let mut vars_stable: Vec<String> =
-        Vec::from_iter(vars.keys().into_iter().map(|k| k.to_string()));
+        Vec::from_iter(vars.keys().map(|k| k.to_string()));
     vars_stable.sort();
 
     let mut ones: Vec<usize> = Vec::new();
@@ -48,11 +48,10 @@ fn fill_vars<'a>(
     num_variant: usize,
 ) {
     let mut num_v = num_variant;
-    for bit in 0..stable_order.len() {
+    for v in stable_order {
         let value: bool = num_v % 2 == 1;
-        let var: &str = &stable_order[bit];
-        vars.insert(var, value);
-        num_v = num_v / 2;
+        vars.insert(v, value);
+        num_v /= 2;
     }
 }
 

@@ -9,7 +9,7 @@ use parser::parse;
 use logic::simplify;
 
 fn main() {
-    let expr = match env::args().skip(1).next() {
+    let expr = match env::args().nth(1) {
         Some(arg) => arg,
         None => {
             println!("provide boolean expression to simplify");
